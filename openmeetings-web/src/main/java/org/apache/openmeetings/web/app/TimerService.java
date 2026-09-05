@@ -37,8 +37,9 @@ import org.apache.openmeetings.db.entity.room.Room.Right;
 import org.apache.openmeetings.db.entity.user.User;
 import org.apache.openmeetings.db.util.ws.RoomMessage;
 import org.apache.openmeetings.db.util.ws.TextRoomMessage;
-import org.apache.wicket.ThreadContext;
 import org.apache.openmeetings.mediaserver.KurentoHandler;
+import org.apache.openmeetings.mediaserver.WbAudioProcessor;
+import org.apache.wicket.ThreadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +62,8 @@ public class TimerService {
 	private SipManager sipManager;
 	@Inject
 	private KurentoHandler kHandler;
+	@Inject
+	private WbAudioProcessor wbAudioProcessor;
 	@Inject
 	private Application app;
 
@@ -100,6 +103,7 @@ public class TimerService {
 					}, () -> {
 						log.warn("No more clients in the room {}", roomId);
 						sipCheckMap.remove(roomId);
+						wbAudioProcessor.clearRoom(roomId);
 						sipClient.ifPresent(cm::exit);
 					});
 					return null;
@@ -126,6 +130,7 @@ public class TimerService {
 			WebSocketHelper.sendRoom(new TextRoomMessage(r.getId(), c, RoomMessage.Type.ROOM_ENTER, c.getUid()));
 		});
 		kHandler.updateSipCount(r, count);
+		wbAudioProcessor.updateSipCount(r, count);
 	}
 
 	public void scheduleModCheck(Room r) {
