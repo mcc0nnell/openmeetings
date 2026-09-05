@@ -67,6 +67,7 @@ public class WbWebSocketHelper {
 	}
 
 	public static void sendWbAll(Long roomId, WbAction meth, JSONObject obj) {
+		WbMediaSync.sync(roomId, meth, obj);
 		sendWbAll(roomId, meth, obj, true);
 	}
 
